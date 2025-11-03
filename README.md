@@ -34,6 +34,7 @@ openapi/   # Contract-first API specification powering APIM and Springdoc
    cd backend
    mvn spring-boot:run
    ```
+   Use a JDK 17 runtime (e.g., set `JAVA_HOME` to a Java 17 installation) so the build can compile Java record classes used by the service.
 2. **Frontend**
    ```bash
    cd frontend
@@ -50,6 +51,40 @@ openapi/   # Contract-first API specification powering APIM and Springdoc
    kubectl apply -f manifests/
    kubectl get pods -n api-first-demo
    ```
+
+## Run the Demo Locally
+
+You can run the full stack locally without any Azure infrastructure. Open two terminals and follow the steps below.
+
+1. **Start the Spring Boot backend**
+   ```bash
+   cd backend
+   export AZURE_ACTIVEDIRECTORY_ENABLED=false
+   mvn spring-boot:run
+   ```
+   The service runs on <http://localhost:8080>. This `AZURE_ACTIVEDIRECTORY_ENABLED` flag disables Azure AD integration for local testing. With Azure AD disabled it serves sample data from the in-memory H2 database, so you can hit endpoints such as `http://localhost:8080/api/v1/users` directly while iterating locally.
+
+2. **Start the Angular frontend**
+   ```bash
+   cd frontend
+   npm install
+   npm start
+   ```
+   The UI is available on <http://localhost:4200> and is preconfigured to call the backend at `http://localhost:8080/api`.
+
+3. **(Optional) Re-enable Azure AD**
+
+   When you are ready to validate authentication, unset `AZURE_ACTIVEDIRECTORY_ENABLED` and export your Azure tenant values before starting the backend:
+
+   ```bash
+   unset AZURE_ACTIVEDIRECTORY_ENABLED
+   export AZURE_TENANT_ID=<tenant-guid>
+   export AZURE_CLIENT_ID=<app-registration-client-id>
+   export AZURE_ALLOWED_GROUPS=ADMIN,USER
+   mvn spring-boot:run
+   ```
+
+   With Azure AD enabled you must supply a valid bearer token in the `Authorization` header when calling the API or using the frontend.
 
 ## Security
 
