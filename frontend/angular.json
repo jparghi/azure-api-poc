@@ -1,7 +1,10 @@
 {
   "$schema": "https://json.schemastore.org/angular-cli",
   "version": 1,
-  "defaultProject": "frontend",
+  "cli": {
+    "defaultProject": "frontend",
+    "analytics": false
+  },
   "projects": {
     "frontend": {
       "projectType": "application",

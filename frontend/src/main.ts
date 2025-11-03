@@ -55,7 +55,10 @@ bootstrapApplication(AppComponent, {
     provideRouter(routes),
     provideHttpClient(withInterceptors([
       apiInterceptor,
-      (req, next) => inject(MsalInterceptor).intercept(req, next)
+      (req, next) =>
+        inject(MsalInterceptor).intercept(req, {
+          handle: incoming => next(incoming)
+        })
     ])),
     importProvidersFrom(MsalModule.forRoot(msalInstance, guardConfig, interceptorConfig)),
     { provide: MSAL_INSTANCE, useValue: msalInstance },
