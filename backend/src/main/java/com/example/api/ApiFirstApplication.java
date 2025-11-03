@@ -20,11 +20,12 @@ public class ApiFirstApplication {
 
     @Bean
     public OpenTelemetry openTelemetry(@Value("${appinsights.connection-string:}") String connectionString) {
-        AzureMonitorExporterBuilder builder = new AzureMonitorExporterBuilder();
-        if (!connectionString.isBlank()) {
-            builder.connectionString(connectionString);
+        if (connectionString == null || connectionString.isBlank()) {
+            return OpenTelemetry.noop();
         }
-        SpanExporter exporter = builder.buildSpanExporter();
+        AzureMonitorExporterBuilder builder = new AzureMonitorExporterBuilder()
+                .connectionString(connectionString);
+        SpanExporter exporter = builder.buildTraceExporter();
         SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
                 .addSpanProcessor(SimpleSpanProcessor.create(exporter))
                 .build();

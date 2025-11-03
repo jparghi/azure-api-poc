@@ -8,9 +8,15 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+    defer-datasource-initialization: true
   sql:
     init:
       mode: always
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${AZURE_AD_ISSUER_URI:https://login.microsoftonline.com/${AZURE_TENANT_ID:tenant-id}/v2.0}
 
 management:
   endpoints:
