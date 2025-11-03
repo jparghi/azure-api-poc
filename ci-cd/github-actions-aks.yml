@@ -1,0 +1,54 @@
+name: Build and Deploy to AKS
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Build backend
+        run: mvn -B package --file backend/pom.xml
+      - name: Log in to GitHub Container Registry
+        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Build Docker images
+        run: |
+          docker build -t ghcr.io/${{ github.actor }}/backend:latest ./backend
+          docker build -t ghcr.io/${{ github.actor }}/frontend:latest ./frontend
+      - name: Push Docker images
+        run: |
+          docker push ghcr.io/${{ github.actor }}/backend:latest
+          docker push ghcr.io/${{ github.actor }}/frontend:latest
+      - name: Azure login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Set AKS context
+        uses: azure/aks-set-context@v3
+        with:
+          resource-group: ${{ secrets.AKS_RESOURCE_GROUP }}
+          cluster-name: ${{ secrets.AKS_CLUSTER_NAME }}
+      - name: Create namespace
+        run: kubectl create namespace api-first-demo --dry-run=client -o yaml | kubectl apply -f -
+      - name: Apply Kubernetes manifests
+        run: kubectl apply -f manifests/
+      - name: Verify rollout
+        run: kubectl rollout status deployment/api-backend -n api-first-demo

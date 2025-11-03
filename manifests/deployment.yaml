@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-backend
+  namespace: api-first-demo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api-backend
+  template:
+    metadata:
+      labels:
+        app: api-backend
+    spec:
+      containers:
+        - name: backend
+          image: ghcr.io/your-org/backend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod
+            - name: APPINSIGHTS_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: api-secrets
+                  key: appinsights-connection
+            - name: AZURE_TENANT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: api-secrets
+                  key: azure-tenant-id
+            - name: AZURE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: api-secrets
+                  key: azure-client-id
+            - name: AZURE_SQL_URL
+              valueFrom:
+                secretKeyRef:
+                  name: api-secrets
+                  key: azure-sql-url
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-frontend
+  namespace: api-first-demo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api-frontend
+  template:
+    metadata:
+      labels:
+        app: api-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: ghcr.io/your-org/frontend:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: APIM_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: api-config
+                  key: apim-base-url

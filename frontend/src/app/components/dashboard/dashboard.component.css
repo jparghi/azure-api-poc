@@ -1,0 +1,11 @@
+:host {
+  display: block;
+}
+
+.card + .card {
+  margin-top: 1.5rem;
+}
+
+table td, table th {
+  font-size: 0.95rem;
+}
