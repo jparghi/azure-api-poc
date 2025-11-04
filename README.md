@@ -1,6 +1,9 @@
 # Azure API-First Microservices POC (AKS + GitHub Actions)
 
 ## Architecture
+
+A collection of detailed C4 and DDD diagrams is available in [docs/architecture-diagrams.md](docs/architecture-diagrams.md). The high-level flow below summarizes the main interaction path.
+
 ```mermaid
 flowchart LR
   A[Angular UI] --> B[APIM Gateway]
