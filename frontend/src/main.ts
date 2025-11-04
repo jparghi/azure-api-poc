@@ -16,14 +16,29 @@ import {
   MsalInterceptor,
   MsalInterceptorConfiguration
 } from '@azure/msal-angular';
-import { InteractionType, IPublicClientApplication, PublicClientApplication } from '@azure/msal-browser';
-import { importProvidersFrom, inject } from '@angular/core';
+import { InteractionType, PublicClientApplication } from '@azure/msal-browser';
+import { EnvironmentProviders, importProvidersFrom, inject, Provider } from '@angular/core';
+import { environment } from './environments/environment';
+import { AZURE_AD_CONFIG, AzureAdConfig } from './app/services/azure-ad-config';
 
-export function MSALInstanceFactory(): IPublicClientApplication {
-  return new PublicClientApplication({
+interface AzureAdConfigResponse {
+  enabled?: boolean;
+  clientId?: string;
+  authority?: string;
+  apiScope?: string;
+}
+
+function buildMsalProviders(
+  config: AzureAdConfig
+): Array<Provider | EnvironmentProviders> {
+  if (!config.enabled) {
+    return [];
+  }
+
+  const msalInstance = new PublicClientApplication({
     auth: {
-      clientId: '00000000-0000-0000-0000-000000000000',
-      authority: 'https://login.microsoftonline.com/common',
+      clientId: config.clientId,
+      authority: config.authority,
       redirectUri: window.location.origin
     },
     cache: {
@@ -31,35 +46,19 @@ export function MSALInstanceFactory(): IPublicClientApplication {
       storeAuthStateInCookie: false
     }
   });
-}
 
-export function MSALGuardConfigFactory(): MsalGuardConfiguration {
-  return { interactionType: InteractionType.Redirect } as MsalGuardConfiguration;
-}
+  const guardConfig = { interactionType: InteractionType.Redirect } as MsalGuardConfiguration;
 
-export function MSALInterceptorConfigFactory(): MsalInterceptorConfiguration {
   const protectedResourceMap = new Map<string, Array<string>>();
-  protectedResourceMap.set('/api', ['api://azure-api-first/.default']);
-  return {
+  const apiRoot = environment.apiBaseUrl.replace(/\/$/, '');
+  protectedResourceMap.set(apiRoot, [config.apiScope]);
+
+  const interceptorConfig = {
     interactionType: InteractionType.Redirect,
     protectedResourceMap
   } as MsalInterceptorConfiguration;
-}
 
-const msalInstance = MSALInstanceFactory();
-const guardConfig = MSALGuardConfigFactory();
-const interceptorConfig = MSALInterceptorConfigFactory();
-
-bootstrapApplication(AppComponent, {
-  providers: [
-    provideRouter(routes),
-    provideHttpClient(withInterceptors([
-      apiInterceptor,
-      (req, next) =>
-        inject(MsalInterceptor).intercept(req, {
-          handle: incoming => next(incoming)
-        })
-    ])),
+  return [
     importProvidersFrom(MsalModule.forRoot(msalInstance, guardConfig, interceptorConfig)),
     { provide: MSAL_INSTANCE, useValue: msalInstance },
     { provide: MSAL_GUARD_CONFIG, useValue: guardConfig },
@@ -68,5 +67,64 @@ bootstrapApplication(AppComponent, {
     MsalGuard,
     MsalBroadcastService,
     MsalInterceptor
-  ]
-}).catch(err => console.error(err));
+  ];
+}
+
+async function loadAzureAdConfig(): Promise<AzureAdConfig> {
+  const apiRoot = environment.apiBaseUrl.replace(/\/$/, '');
+  try {
+    const response = await fetch(`${apiRoot}/config/azure-ad`);
+    if (!response.ok) {
+      throw new Error(`Failed to load Azure AD config: ${response.status}`);
+    }
+    const data = (await response.json()) as AzureAdConfigResponse;
+    const usable = Boolean(data.enabled) && !!data.clientId && !!data.authority && !!data.apiScope;
+    if (!usable) {
+      return {
+        enabled: false,
+        clientId: '',
+        authority: '',
+        apiScope: ''
+      };
+    }
+    return {
+      enabled: true,
+      clientId: data.clientId!,
+      authority: data.authority!,
+      apiScope: data.apiScope!
+    };
+  } catch (error) {
+    console.warn('Azure AD configuration unavailable, continuing without authentication.', error);
+    return {
+      enabled: false,
+      clientId: '',
+      authority: '',
+      apiScope: ''
+    };
+  }
+}
+
+(async () => {
+  const azureAdConfig = await loadAzureAdConfig();
+  const interceptors = [apiInterceptor];
+
+  if (azureAdConfig.enabled) {
+    interceptors.push((req, next) =>
+      inject(MsalInterceptor).intercept(req, {
+        handle: incoming => next(incoming)
+      })
+    );
+  }
+
+  const providers: Array<Provider | EnvironmentProviders> = [
+    provideRouter(routes),
+    provideHttpClient(withInterceptors(interceptors)),
+    { provide: AZURE_AD_CONFIG, useValue: azureAdConfig }
+  ];
+
+  providers.push(...buildMsalProviders(azureAdConfig));
+
+  bootstrapApplication(AppComponent, {
+    providers
+  }).catch(err => console.error(err));
+})();
