@@ -19,7 +19,7 @@ public class AzureAdConfigController {
 
     @GetMapping("/azure-ad")
     public ResponseEntity<AzureAdConfigResponse> getAzureAdConfiguration() {
-        boolean aadEnabled = environment.getProperty("azure.activedirectory.enabled", Boolean.class, true);
+        boolean aadEnabled = environment.getProperty("azure.activedirectory.enabled", Boolean.class, false);
         String clientId = environment.getProperty("azure.activedirectory.credential.client-id", "");
         String tenantId = environment.getProperty("azure.activedirectory.profile.tenant-id", "");
         String appIdUri = environment.getProperty("azure.activedirectory.app-id-uri", "");
