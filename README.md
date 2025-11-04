@@ -25,7 +25,10 @@ This proof-of-concept demonstrates an API-first architecture with Azure-native s
 ```
 backend/   # Spring Boot REST API with security, auditing, observability
 frontend/  # Angular UI authenticating with Azure AD and calling the API
-manifests/ # Kubernetes deployment, service, ingress, configmap, secret
+manifests/ # Legacy raw Kubernetes manifests (still available for reference)
+charts/    # Helm chart packaging the Kubernetes resources
+apim/      # Azure API Management policies
+docs/      # Architecture notes and enhancement ROI justification
 ci-cd/     # GitHub Actions workflow for AKS deployment
 openapi/   # Contract-first API specification powering APIM and Springdoc
 ```
@@ -51,9 +54,10 @@ openapi/   # Contract-first API specification powering APIM and Springdoc
    ```
 4. **Kubernetes Deployment**
    ```bash
-   kubectl apply -f manifests/
+   helm upgrade --install api-first charts/azure-api-first -n api-first-demo --create-namespace
    kubectl get pods -n api-first-demo
    ```
+   The original manifests remain under `manifests/` for comparison or direct application during early prototyping.
 
 ## Run the Demo Locally
 
@@ -100,6 +104,7 @@ You can run the full stack locally without any Azure infrastructure. Open two te
 * Micrometer + Prometheus endpoint via `/actuator/prometheus`.
 * Azure Monitor OpenTelemetry exporter wired to Application Insights.
 * Custom `AuditLogInterceptor` captures every request and surfaces a REST audit stream.
+* Domain events for user lifecycle changes are published to Azure Service Bus, giving downstream systems real-time visibility.
 
 ## CI/CD Pipeline
 
@@ -107,6 +112,39 @@ You can run the full stack locally without any Azure infrastructure. Open two te
 * Images pushed to GitHub Container Registry.
 * `azure/login` + `aks-set-context` deploy manifests to AKS.
 * Rollout verification ensures healthy deployments.
+* Helm package rendering can be incorporated to promote consistent configuration between environments.
+
+## Async Domain Events with Azure Service Bus
+
+The backend now emits user lifecycle events (`USER_CREATED`, `USER_UPDATED`, `USER_DELETED`) to an Azure Service Bus queue. Configure the queue name, connection string, and toggle with the following environment variables:
+
+| Property | Description | Default |
+| --- | --- | --- |
+| `SERVICEBUS_ENABLED` | Enables Service Bus publishing when set to `true`. | `false` |
+| `SERVICEBUS_QUEUE_NAME` | Queue that receives user domain events. | `user-events` |
+| `SERVICEBUS_CONNECTION_STRING` | Connection string for the namespace/policy. | _(empty)_ |
+
+Enable publishing by setting the variables in Kubernetes (already templated in the Helm chart) or exporting them locally before running the Spring Boot service.
+
+## Helm Chart Deployment
+
+The `charts/azure-api-first` chart consolidates the raw manifests into a parameterized package. Update `values.yaml` (or provide a custom values file) to override replica counts, container images, ingress hostnames, and sensitive settings prior to installation. Example override:
+
+```bash
+helm upgrade --install api-first charts/azure-api-first \
+  -n api-first-demo --create-namespace \
+  --set image.backend=ghcr.io/contoso/backend:v1.0.0 \
+  --set image.frontend=ghcr.io/contoso/frontend:v1.0.0 \
+  --set config.serviceBusEnabled=true
+```
+
+## APIM Rate Limiting Policy
+
+The repository now includes an APIM policy (`apim/policies/global-policy.xml`) that applies rate limiting and quota enforcement at the gateway. Import it into your APIM instance (e.g., at the API or product scope) to enforce:
+
+* **60 requests per minute** per subscription or caller IP using `rate-limit-by-key`.
+* **1,000 requests per day** quotas with `quota-by-key`.
+* Response headers (`X-RateLimit-*`) exposing the caller's remaining budget so clients can self-throttle.
 
 ## Verify
 

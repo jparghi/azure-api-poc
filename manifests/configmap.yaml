@@ -900,9 +900,11 @@ metadata:
     azure.api-first.partnership-owner-email: partnership@techmahindra.com
     azure.api-first.blueprint-owner-email: blueprint@techmahindra.com
     azure.api-first.capability-owner-email: capability@techmahindra.com
-  data:
-    apim-base-url: https://apim-techmahindra.azure-api.net
-    frontend-url: https://api-first-demo.example.com
-    backend-url: https://api-first-demo.example.com/api
-    instrumentation-key: 00000000-0000-0000-0000-000000000000
-    azure-sql-db: jdbc:sqlserver://server.database.windows.net:1433;database=db;encrypt=true
+data:
+  apim-base-url: https://apim-techmahindra.azure-api.net
+  servicebus-enabled: "false"
+  servicebus-queue-name: user-events
+  frontend-url: https://api-first-demo.example.com
+  backend-url: https://api-first-demo.example.com/api
+  instrumentation-key: 00000000-0000-0000-0000-000000000000
+  azure-sql-db: jdbc:sqlserver://server.database.windows.net:1433;database=db;encrypt=true

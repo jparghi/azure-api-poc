@@ -1,0 +1,43 @@
+namespace: api-first-demo
+replicaCount:
+  backend: 2
+  frontend: 2
+image:
+  backend: ghcr.io/your-org/backend:latest
+  frontend: ghcr.io/your-org/frontend:latest
+service:
+  backend:
+    type: ClusterIP
+    port: 80
+    targetPort: 8080
+  frontend:
+    type: LoadBalancer
+    port: 80
+    targetPort: 80
+ingress:
+  enabled: true
+  className: nginx
+  host: api-first-demo.example.com
+  tls:
+    enabled: true
+    secretName: api-first-demo-tls
+config:
+  apimBaseUrl: https://apim-techmahindra.azure-api.net
+  serviceBusEnabled: "false"
+  serviceBusQueueName: user-events
+secrets:
+  azureSqlUrl: jdbc:sqlserver://server.database.windows.net:1433;database=db;encrypt=true
+  azureClientId: 00000000-0000-0000-0000-000000000000
+  azureTenantId: 00000000-0000-0000-0000-000000000000
+  appInsightsConnection: InstrumentationKey=00000000-0000-0000-0000-000000000000
+  azureClientSecret: super-secret-value
+  serviceBusConnection: Endpoint=sb://namespace.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=BASE64==
+resources:
+  backend:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+  frontend: {}
