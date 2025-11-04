@@ -5,104 +5,100 @@ This document captures C4-style architecture views and Domain-Driven Design (DDD
 ## Level 1 — System Context
 
 ```mermaid
-%%{init: {'theme': 'forest', 'themeVariables': { 'fontFamily': 'Inter,Segoe UI,Arial', 'primaryColor': '#0F766E', 'primaryBorderColor': '#115E59', 'primaryTextColor': '#F0FDFA', 'secondaryColor': '#ECFEFF', 'tertiaryColor': '#CCFBF1' }}}%%
-C4Context
-  title Azure API-First Platform — System Context
-  Person(admin, "Admin User", "Manages user accounts and audit insights")
-  Person(user, "Standard User", "Reviews own profile and activity")
+%%{init: {"theme": "forest", "themeVariables": {"fontFamily": "Inter,Segoe UI,Arial", "primaryColor": "#0F766E", "primaryBorderColor": "#115E59", "primaryTextColor": "#F0FDFA", "secondaryColor": "#ECFEFF", "tertiaryColor": "#CCFBF1"}}}%%
+flowchart TB
+  subgraph Platform[API-First Platform]
+    SPA["Angular Frontend\nAngular 17"]
+    API["Spring Boot API\nJava 17"]
+    SQL[("Azure SQL\nManaged DB")]
+    H2[("H2\nIn-memory DB")]
+  end
 
-  System_Ext(azureAD, "Azure Active Directory", "Identity provider issuing JWT tokens")
-  System_Ext(apim, "Azure API Management", "Gateway enforcing policies and throttling")
-  System_Ext(appInsights, "Azure Application Insights", "Telemetry & observability")
+  Admin(["Admin User\nManages accounts & insights"])
+  User(["Standard User\nReviews profile & activity"])
+  AzureAD[["Azure Active Directory\nIssues JWT tokens"]]
+  APIM[["Azure API Management\nPolicies & throttling"]]
+  Insights[["Azure Application Insights\nTelemetry & observability"]]
 
-  System_Boundary(core, "API-First Platform") {
-    Container_Web(spa, "Angular Frontend", "Angular 17", "Authenticates via Azure AD and invokes APIs")
-    Container(api, "Spring Boot API", "Java 17", "User management & audit endpoints")
-    ContainerDb(sql, "Azure SQL", "Managed SQL Database", "Persists user records")
-    ContainerDb(h2, "H2", "In-memory DB", "Local developer data store")
-  }
-
-  Rel(admin, spa, "Uses", "Browser / HTTPS")
-  Rel(user, spa, "Uses", "Browser / HTTPS")
-  Rel(spa, apim, "Invokes", "HTTPS + JWT")
-  Rel(apim, api, "Routes", "HTTPS")
-  Rel(api, sql, "Reads/Writes", "JDBC")
-  Rel(api, h2, "Reads/Writes", "JDBC (local)")
-  Rel(api, appInsights, "Publishes telemetry", "OpenTelemetry")
-  Rel(api, azureAD, "Validates tokens", "OAuth 2.0 / OIDC")
-  Rel(spa, azureAD, "Obtains tokens", "MSAL.js")
+  Admin -- "Uses" --> SPA
+  User -- "Uses" --> SPA
+  SPA -- "Obtains tokens" --> AzureAD
+  SPA -- "Invokes" --> APIM
+  APIM -- "Routes" --> API
+  API -- "Validates tokens" --> AzureAD
+  API -- "Publishes telemetry" --> Insights
+  API -- "Reads/Writes" --> SQL
+  API -- "Reads/Writes (local)" --> H2
 ```
 
 ## Level 2 — Container View
 
 ```mermaid
-%%{init: {'theme': 'neutral', 'themeVariables': { 'fontFamily': 'Inter,Segoe UI,Arial', 'primaryColor': '#1D4ED8', 'primaryTextColor': '#F8FAFC', 'lineColor': '#1E293B', 'secondaryColor': '#E0F2FE', 'tertiaryColor': '#F1F5F9' }}}%%
-C4Container
-  title Azure API-First Platform — Container Diagram
-  Person(admin, "Admin")
-  Person(user, "End User")
+%%{init: {"theme": "neutral", "themeVariables": {"fontFamily": "Inter,Segoe UI,Arial", "primaryColor": "#1D4ED8", "primaryTextColor": "#F8FAFC", "lineColor": "#1E293B", "secondaryColor": "#E0F2FE", "tertiaryColor": "#F1F5F9"}}}%%
+flowchart TB
+  subgraph Platform[Azure API-First Platform]
+    SPA["Angular SPA\nNode + Angular"]
+    subgraph AKS[AKS Cluster]
+      APIMGW["APIM Self-Hosted Gateway\nAzure APIM"]
+      Service["Spring Boot Service\nJava 17 + Spring"]
+      Otel["OpenTelemetry Collector\nAzure Monitor"]
+    end
+    SQL[("Azure SQL Database\nPaaS")]
+  end
 
-  System_Boundary(core, "Azure API-First Platform") {
-    Container(spa, "Angular SPA", "Node + Angular", "User interface, MSAL authentication, UX workflows")
-    Container_Boundary(k8s, "AKS Cluster") {
-      Container(apimGw, "APIM Self-Hosted Gateway", "Azure APIM", "Enforces policies, routes traffic to services")
-      Container(api, "Spring Boot Service", "Java 17 + Spring", "Implements OpenAPI contract, RBAC, auditing")
-      Container(otel, "OpenTelemetry Collector", "Azure Monitor", "Forwards traces & metrics")
-    }
-    ContainerDb(sql, "Azure SQL Database", "PaaS", "Stores users, roles, audit facts")
-    Container_Ext(appInsights, "Application Insights", "Azure Monitor", "Collects metrics, logs, traces")
-    Container_Ext(keyVault, "Azure Key Vault", "Secrets", "Stores credentials & connection strings")
-    Container_Ext(ghActions, "GitHub Actions", "CI/CD", "Builds & deploys containers to AKS")
-  }
+  AppInsights[["Application Insights\nAzure Monitor"]]
+  KeyVault[["Azure Key Vault\nSecrets"]]
+  GitHub[["GitHub Actions\nCI/CD"]]
+  Admin(["Admin\nManages users/audit dashboards"])
+  EndUser(["End User\nViews profile & metrics"])
 
-  Rel(admin, spa, "Manages users/audit dashboards")
-  Rel(user, spa, "Views profile & metrics")
-  Rel(spa, apimGw, "HTTPS requests", "JWT bearer tokens")
-  Rel(apimGw, api, "Routes REST calls")
-  Rel(api, sql, "CRUD operations", "JDBC + Liquibase")
-  Rel(api, keyVault, "Fetches secrets", "Managed identity")
-  Rel(api, otel, "Exports telemetry")
-  Rel(otel, appInsights, "Sends traces/metrics")
-  Rel(ghActions, k8s, "Applies manifests", "kubectl via OIDC")
+  Admin -- "HTTPS" --> SPA
+  EndUser -- "HTTPS" --> SPA
+  SPA -- "JWT bearer" --> APIMGW
+  APIMGW -- "Routes REST" --> Service
+  Service -- "CRUD" --> SQL
+  Service -- "Fetches secrets" --> KeyVault
+  Service -- "Exports telemetry" --> Otel
+  Otel -- "Sends traces/metrics" --> AppInsights
+  GitHub -- "Deploys manifests" --> AKS
 ```
 
 ## Level 3 — Component View (Spring Boot API)
 
 ```mermaid
-%%{init: {'theme': 'dark', 'themeVariables': { 'fontFamily': 'Inter,Segoe UI,Arial', 'primaryColor': '#0EA5E9', 'primaryTextColor': '#F8FAFC', 'primaryBorderColor': '#0284C7', 'lineColor': '#E2E8F0', 'secondaryColor': '#075985', 'tertiaryColor': '#1E293B' }}}%%
-C4Component
-  title Spring Boot API — Component Diagram
-  Container_Boundary(api, "Spring Boot API") {
-    Component(controller, "UserController", "Spring Web", "REST endpoints for CRUD operations")
-    Component(auditController, "AuditController", "Spring Web", "Streams audit events")
-    Component(service, "UserService", "Spring Service", "Domain logic, validation, role checks")
-    Component(auditService, "AuditService", "Spring Service", "Persists and queries audit records")
-    Component(repo, "UserRepository", "Spring Data JPA", "Persists user aggregates")
-    Component(auditRepo, "AuditRepository", "Spring Data JPA", "Persists audit entries")
-    Component(security, "SecurityConfig", "Spring Security", "JWT filters, RBAC policies")
-    Component(mapper, "UserMapper", "MapStruct", "Maps entities ↔ DTOs")
-    Component(eventPublisher, "AuditLogInterceptor", "Spring MVC", "Publishes request events")
-  }
+%%{init: {"theme": "dark", "themeVariables": {"fontFamily": "Inter,Segoe UI,Arial", "primaryColor": "#0EA5E9", "primaryTextColor": "#F8FAFC", "primaryBorderColor": "#0284C7", "lineColor": "#E2E8F0", "secondaryColor": "#075985", "tertiaryColor": "#1E293B"}}}%%
+flowchart TB
+  subgraph API[Spring Boot API]
+    Controller["UserController\nSpring Web"]
+    AuditController["AuditController\nSpring Web"]
+    Service["UserService\nSpring Service"]
+    AuditService["AuditService\nSpring Service"]
+    Repository["UserRepository\nSpring Data JPA"]
+    AuditRepository["AuditRepository\nSpring Data JPA"]
+    Security["SecurityConfig\nSpring Security"]
+    Mapper["UserMapper\nMapStruct"]
+    Interceptor["AuditLogInterceptor\nSpring MVC"]
+  end
 
-  ContainerDb(sql, "Azure SQL", "PostgreSQL-compatible", "User & audit schema")
-  Container_Ext(azureAd, "Azure AD", "Identity platform", "Issues JWT tokens")
+  SQL[("Azure SQL\nUser & audit schema")]
+  AzureAD[["Azure AD\nIdentity platform"]]
 
-  Rel(controller, service, "Delegates commands/queries")
-  Rel(auditController, auditService, "Fetches audit stream")
-  Rel(service, repo, "Uses")
-  Rel(auditService, auditRepo, "Uses")
-  Rel(repo, sql, "Reads/Writes entities")
-  Rel(auditRepo, sql, "Reads/Writes audits")
-  Rel(security, azureAd, "Validates JWTs")
-  Rel(eventPublisher, auditService, "Persists request metadata")
-  Rel(service, auditService, "Appends audit events")
-  Rel(mapper, service, "Maps DTOs ↔ aggregates")
+  Controller -- "Delegates" --> Service
+  AuditController -- "Fetches audit stream" --> AuditService
+  Service -- "Uses" --> Repository
+  AuditService -- "Uses" --> AuditRepository
+  Repository -- "Reads/Writes" --> SQL
+  AuditRepository -- "Reads/Writes" --> SQL
+  Security -- "Validates JWTs" --> AzureAD
+  Interceptor -- "Persists request metadata" --> AuditService
+  Service -- "Appends audit events" --> AuditService
+  Mapper -- "Maps DTOs ↔ aggregates" --> Service
 ```
 
 ## DDD Context Map
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'fontFamily': 'Inter,Segoe UI,Arial', 'primaryColor': '#4C1D95', 'primaryTextColor': '#F5F3FF', 'secondaryColor': '#DDD6FE', 'tertiaryColor': '#EDE9FE', 'lineColor': '#4C1D95' }}}%%
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter,Segoe UI,Arial", "primaryColor": "#4C1D95", "primaryTextColor": "#F5F3FF", "secondaryColor": "#DDD6FE", "tertiaryColor": "#EDE9FE", "lineColor": "#4C1D95"}}}%%
 flowchart TD
   subgraph Identity[Identity & Access Context]
     direction TB
@@ -124,13 +120,13 @@ flowchart TD
     Metrics[Telemetry Export]
   end
 
-  AAD -->|Publishes| TokenClaims[(JWT Claims)]
-  TokenClaims -->|Conformist| Aggregate
-  Aggregate -->|Domain Events| AuditStream
+  AAD -- "Publishes" --> TokenClaims[(JWT Claims)]
+  TokenClaims -- "Conformist" --> Aggregate
+  Aggregate -- "Domain Events" --> AuditStream
   AuditStream --> AuditStore
   AuditStream --> Metrics
   ServiceLayer --> Repo
-  Repo -->|Shared Kernel (User Schema)| AuditStore
+  Repo -- "Shared Kernel (User Schema)" --> AuditStore
 
   classDef boundedContext fill:#DDD6FE,stroke:#4C1D95,stroke-width:2px,color:#1F2937;
   class Identity,UserMgmt,Audit boundedContext;
@@ -143,7 +139,7 @@ flowchart TD
 ## Use Case Sequence — "Create User"
 
 ```mermaid
-%%{init: {'theme': 'neutral', 'themeVariables': { 'fontFamily': 'Inter,Segoe UI,Arial', 'primaryColor': '#0F172A', 'primaryTextColor': '#F8FAFC', 'secondaryColor': '#CBD5F5', 'tertiaryColor': '#E2E8F0', 'lineColor': '#0F172A' }}}%%
+%%{init: {"theme": "neutral", "themeVariables": {"fontFamily": "Inter,Segoe UI,Arial", "primaryColor": "#0F172A", "primaryTextColor": "#F8FAFC", "secondaryColor": "#CBD5F5", "tertiaryColor": "#E2E8F0", "lineColor": "#0F172A"}}}%%
 sequenceDiagram
   autonumber
   participant Admin as Admin User
