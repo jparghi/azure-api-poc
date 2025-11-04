@@ -17,7 +17,7 @@ import {
   MsalInterceptorConfiguration
 } from '@azure/msal-angular';
 import { InteractionType, PublicClientApplication } from '@azure/msal-browser';
-import { importProvidersFrom, inject, Provider } from '@angular/core';
+import { EnvironmentProviders, importProvidersFrom, inject, Provider } from '@angular/core';
 import { environment } from './environments/environment';
 import { AZURE_AD_CONFIG, AzureAdConfig } from './app/services/azure-ad-config';
 
@@ -28,7 +28,9 @@ interface AzureAdConfigResponse {
   apiScope?: string;
 }
 
-function buildMsalProviders(config: AzureAdConfig): Provider[] {
+function buildMsalProviders(
+  config: AzureAdConfig
+): Array<Provider | EnvironmentProviders> {
   if (!config.enabled) {
     return [];
   }
@@ -114,7 +116,7 @@ async function loadAzureAdConfig(): Promise<AzureAdConfig> {
     );
   }
 
-  const providers: Provider[] = [
+  const providers: Array<Provider | EnvironmentProviders> = [
     provideRouter(routes),
     provideHttpClient(withInterceptors(interceptors)),
     { provide: AZURE_AD_CONFIG, useValue: azureAdConfig }
