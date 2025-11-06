@@ -152,8 +152,8 @@ The repository now includes an APIM policy (`apim/policies/global-policy.xml`) t
 * `GET /api/v1/audit` → audit trail
 * App Insights metrics visible
 
-## Enhancements
+## Added Enhancements
 
-* Add Service Bus for async events
-* Add Helm chart for manifests
+* Service Bus for async events
+* Helm chart for manifests
 * Integrate APIM for rate limiting
