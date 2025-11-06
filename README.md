@@ -14,7 +14,7 @@ flowchart LR
 
 ## Tech Stack
 
-Angular 17 · Java 17 · Spring Boot 3 · Azure SQL · Azure AD JWT · AKS · APIM · App Insights · GitHub Actions
+Angular 17 · Java 17 · Spring Boot 3 · Azure SQL · Azure AD JWT · AKS · APIM · App Insights · GitHub Actions. A detailed breakdown is available in [docs/tech_stack.md](docs/tech_stack.md).
 
 ## Solution Overview
 
