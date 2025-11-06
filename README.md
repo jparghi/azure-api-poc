@@ -93,6 +93,10 @@ You can run the full stack locally without any Azure infrastructure. Open two te
 
    With Azure AD enabled you must supply a valid bearer token in the `Authorization` header when calling the API or using the frontend.
 
+## Swagger UI Documentation
+
+Instructions for accessing and troubleshooting the auto-generated Swagger UI are available in [docs/swagger-ui.md](docs/swagger-ui.md).
+
 ## Security
 
 * Azure AD-protected APIs using JWT bearer tokens.
