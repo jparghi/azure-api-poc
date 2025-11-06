@@ -1,0 +1,6 @@
+apiVersion: v2
+name: azure-api-first
+version: 0.1.0
+description: Helm chart for deploying the Azure API-first demo stack to AKS
+type: application
+appVersion: "0.1.0"

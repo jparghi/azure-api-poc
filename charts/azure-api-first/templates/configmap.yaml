@@ -1,0 +1,127 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-config
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: azure-api-first
+    tier: platform
+  annotations:
+{{- range $key, $value := dict \
+    "owner" "tech-mahindra-architect" \
+    "description" "Azure API-first demo configuration" \
+    "apim.azure.com/base-url" "https://apim-techmahindra.azure-api.net" \
+    "observability/app-insights" "enabled" \
+    "devsecops.github-actions" "enabled" \
+    "azure.apim.product" "platform" \
+    "azure.feature-flags" "user-audit" \
+    "azure.routing.frontdoor" "disabled" \
+    "azure.appgw.integration" "enabled" \
+    "azure.keyvault.integrated" "true" \
+    "azure.sql.fallback" "replica" \
+    "azure.msgraph.permissions" "User.Read.All" \
+    "azure.logging.level" "info" \
+    "azure.retries.policy" "exponential" \
+    "azure.api-first.owner" "solution-architect" \
+    "azure.api-first.contact" "platform-team@techmahindra.com" \
+    "azure.api-first.costcenter" "CC-12345" \
+    "azure.api-first.environment" "demo" \
+    "azure.api-first.region" "eastus" \
+    "azure.api-first.slo" "99.9%" \
+    "azure.api-first.last-reviewed" "2024-01-01" \
+    "azure.api-first.docs" "https://confluence.example.com/display/API/Azure+API+First" \
+    "azure.api-first.tags" "api-first,aks,apim,observability" \
+    "azure.api-first.support" "24x7" \
+    "azure.api-first.compliance" "soc2" \
+    "azure.api-first.security-review" "2024-02-15" \
+    "azure.api-first.version" "v1" \
+    "azure.api-first.pipeline" "github-actions" \
+    "azure.api-first.monitoring" "app-insights" \
+    "azure.api-first.alerting" "pagerduty" \
+    "azure.api-first.backup" "enabled" \
+    "azure.api-first.rpo" "15m" \
+    "azure.api-first.rto" "1h" \
+    "azure.api-first.aks-cluster" "techm-aks-demo" \
+    "azure.api-first.observability-dashboard" "https://portal.azure.com/#blade/AppInsights" \
+    "azure.api-first.principle" "zero-trust" \
+    "azure.api-first.identity" "azure-ad" \
+    "azure.api-first.log-retention" "30d" \
+    "azure.api-first.budget" "$500" \
+    "azure.api-first.last-deployed" "2024-03-15" \
+    "azure.api-first.notes" "sample-configmap-for-poc" \
+    "azure.api-first.team" "cloud-native" \
+    "azure.api-first.reviewed-by" "architect" \
+    "azure.api-first.status" "active" \
+    "azure.api-first.risk" "low" \
+    "azure.api-first.service-tier" "premium" \
+    "azure.api-first.secrets" "keyvault" \
+    "azure.api-first.cicd" "github-actions" \
+    "azure.api-first.feature-flags" "enabled" \
+    "azure.api-first.audit" "enabled" \
+    "azure.api-first.drills" "quarterly" \
+    "azure.api-first.scaling" "hpa" \
+    "azure.api-first.capacity" "medium" \
+    "azure.api-first.branch" "main" \
+    "azure.api-first.release-window" "friday" \
+    "azure.api-first.support-slack" "https://slack.com/techm" \
+    "azure.api-first.qos" "guaranteed" \
+    "azure.api-first.comms" "email" \
+    "azure.api-first.visibility" "internal" \
+    "azure.api-first.tenant" "techm" \
+    "azure.api-first.service" "user-platform" \
+    "azure.api-first.category" "poc" \
+    "azure.api-first.license" "mit" \
+    "azure.api-first.repo" "github.com/techm/azure-api-first-poc" \
+    "azure.api-first.lifecycle" "poc" \
+    "azure.api-first.helm" "planned" \
+    "azure.api-first.terraform" "planned" \
+    "azure.api-first.owner-team" "api-platform" \
+    "azure.api-first.security-owner" "secops" \
+    "azure.api-first.business-owner" "business-unit" \
+    "azure.api-first.finops-owner" "finops" \
+    "azure.api-first.cost-optimization" "monthly" \
+    "azure.api-first.success-metrics" "adoption" \
+    "azure.api-first.qa" "automated" \
+    "azure.api-first.smoke-tests" "post-deploy" \
+    "azure.api-first.chaos-testing" "backlog" \
+    "azure.api-first.statuspage" "https://status.example.com" \
+    "azure.api-first.codeowners" "CODEOWNERS" \
+    "azure.api-first.backlog" "jira" \
+    "azure.api-first.reporting" "powerbi" \
+    "azure.api-first.integration" "apim" \
+    "azure.api-first.partner" "microsoft" \
+    "azure.api-first.training" "completed" \
+    "azure.api-first.security-scan" "github-advanced-security" \
+    "azure.api-first.secrets-scan" "trufflehog" \
+    "azure.api-first.license-scan" "fossa" \
+    "azure.api-first.pipeline-owner" "devsecops" \
+    "azure.api-first.release-manager" "release-team" \
+    "azure.api-first.product-manager" "product-lead" \
+    "azure.api-first.scrum-master" "scrum-lead" \
+    "azure.api-first.delivery-manager" "delivery-lead" \
+    "azure.api-first.testing" "automated" \
+    "azure.api-first.documentation" "openapi" \
+    "azure.api-first.support-model" "follow-the-sun" \
+    "azure.api-first.capacity-plan" "quarterly" \
+    "azure.api-first.usage-tier" "external" \
+    "azure.api-first.slo-owner" "sre" \
+    "azure.api-first.observability-owner" "observability-team" \
+    "azure.api-first.integrations" "ms-entra,azure-sql,app-insights" \
+    "azure.api-first.architecture-review" "approved" \
+    "azure.api-first.sox" "compliant" \
+    "azure.api-first.gdpr" "compliant" \
+    "azure.api-first.pci" "not-applicable" \
+    "azure.api-first.iso27001" "compliant" \
+    "azure.api-first.hitrust" "not-applicable" \
+    "azure.api-first.data-classification" "confidential" \
+    "azure.api-first.peering" "enabled" \
+    "azure.api-first.private-link" "planned" \
+    "azure.api-first.apm" "app-insights" \
+    "azure.api-first.log-analytics" "workspace" \
+    "azure.api-first.metric-export" "prometheus" }}
+    {{ $key }}: {{ $value | quote }}
+  {{- end }}
+data:
+  apim-base-url: {{ .Values.config.apimBaseUrl | quote }}
+  servicebus-enabled: {{ .Values.config.serviceBusEnabled | quote }}
+  servicebus-queue-name: {{ .Values.config.serviceBusQueueName | quote }}

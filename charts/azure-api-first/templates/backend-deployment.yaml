@@ -2,9 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: api-backend
-  namespace: api-first-demo
+  namespace: {{ .Values.namespace }}
 spec:
-  replicas: 2
+  replicas: {{ .Values.replicaCount.backend }}
   selector:
     matchLabels:
       app: api-backend
@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: ghcr.io/your-org/backend:latest
+          image: {{ .Values.image.backend }}
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -57,21 +57,18 @@ spec:
                 secretKeyRef:
                   name: api-secrets
                   key: servicebus-connection
+          {{- with .Values.resources.backend }}
           resources:
-            requests:
-              cpu: 200m
-              memory: 512Mi
-            limits:
-              cpu: 500m
-              memory: 1Gi
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: api-frontend
-  namespace: api-first-demo
+  namespace: {{ .Values.namespace }}
 spec:
-  replicas: 2
+  replicas: {{ .Values.replicaCount.frontend }}
   selector:
     matchLabels:
       app: api-frontend
@@ -82,7 +79,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ghcr.io/your-org/frontend:latest
+          image: {{ .Values.image.frontend }}
           ports:
             - containerPort: 80
           env:
@@ -91,3 +88,7 @@ spec:
                 configMapKeyRef:
                   name: api-config
                   key: apim-base-url
+          {{- with .Values.resources.frontend }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
