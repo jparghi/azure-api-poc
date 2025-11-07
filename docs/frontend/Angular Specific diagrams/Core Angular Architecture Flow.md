@@ -37,13 +37,6 @@ flowchart TB
 
 ```
 
----
-
-Perfect — your explanation is already excellent; we just need to **fix the layout** and make each point clearly separated (new line for every step) so it’s visually easy to follow.
-
-Here’s a polished, **Markdown-ready “How to Read It”** section for your Core Angular Architecture Flow 👇
-
----
 
 ### 🧠 **How to Read It**
 
