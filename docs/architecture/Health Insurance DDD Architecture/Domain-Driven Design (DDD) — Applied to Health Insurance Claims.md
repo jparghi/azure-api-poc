@@ -182,8 +182,8 @@ public interface ClaimRepository {
 
 ### 5️⃣ RESULT — Architecture Outcome
 
-✅ 6 bounded contexts (loosely coupled)
-✅ Async event flow (Kafka or Azure Service Bus)
-✅ Independent deployability
-✅ Traceability for compliance
-✅ Reduced regression across modules
+✅ 6 bounded contexts (loosely coupled)  
+✅ Async event flow (Kafka or Azure Service Bus)  
+✅ Independent deployability  
+✅ Traceability for compliance  
+✅ Reduced regression across modules  

@@ -5,23 +5,27 @@ This roadmap highlights what has been accomplished so far and outlines the next 
 ```mermaid
 %%{init: {"theme": "neutral", "flowchart": {"curve": "basis"}}}%%
 timeline
-    title 12-Month Platform Roadmap
-    section Foundation & Current State
-      Q1 2024 : API-first POC delivered • AKS baseline • Azure AD auth • CI/CD pipeline • App Insights telemetry
-    section Compliance & Guardrails
-      Q2 2024 : Policy-as-code (Azure Policy + OPA) • SOC2 gap assessment • Automated dependency auditing • Data retention baselines
-    section Observability & Reliability
-      Q3 2024 : Full-stack distributed tracing • Synthetic monitoring • Error budget SLOs • Chaos engineering game days
-    section Security & Privacy Enhancements
-      Q3 2024 : Azure Key Vault rotation automation • Secrets scanning in CI • Confidential computing evaluation
-    section Developer Experience & Quality
-      Q4 2024 : Inner-loop dev containers • Contract testing suite • Shift-left DAST • Golden path documentation
-    section Scalability & Cost Optimization
-      Q4 2024 : Horizontal pod autoscaling tuning • KEDA event-driven scaling • Performance load testing • Cost governance dashboards
-    section Compliance Operationalization
-      Q1 2025 : Continuous compliance reporting • Evidence automation playbooks • External audit readiness package
-    section Business Value Expansion
-      Q1 2025 : Partner API monetization • Multi-region deployment blueprint • Customer-facing reliability status page
+    title Platform Roadmap (Q4 2025 → Q4 2027)
+    
+    section Platform Modernization & Foundation
+      Q4 2025 : Unified platform baseline • Centralized config service • Enhanced CI/CD observability • Zero-downtime deployment playbooks
+      Q1 2026 : Service catalog rollout • Improved developer onboarding • API versioning standards • Cross-team architecture reviews
+
+    section Resilience & Multi-Region Scale
+      Q2 2026 : Multi-region active-active AKS • Geo-replicated Azure SQL / Cosmos DB • Cross-region failover testing • Traffic management via Front Door
+      Q3 2026 : Multi-cloud DR (Azure + AWS) pilot • Automated failback runbooks • Chaos test automation • Global DNS orchestration
+
+    section Security & Governance Automation
+      Q4 2026 : Central secrets governance (Key Vault + Defender) • Runtime policy enforcement • Continuous threat modeling • Pen-testing as code
+      Q1 2027 : Zero-trust network enforcement • SBOM + supply chain attestation • Automated credential lifecycle • Security posture dashboards
+
+    section Observability, AI & Insights
+      Q2 2027 : AI-assisted alert triage • Root-cause prediction with Azure ML • Business KPI observability layer • Cost anomaly detection bots
+      Q3 2027 : Unified telemetry lake (logs + metrics + traces) • Generative AI summarization of incidents • Auto-remediation proof-of-concept
+
+    section Business Value & Ecosystem Expansion
+      Q4 2027 : Partner marketplace integration • Self-service API onboarding portal • SLA-based pricing models • Platform OKRs & ROI analytics
+
 ```
 
 ## Roadmap Themes
