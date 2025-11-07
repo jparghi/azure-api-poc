@@ -6,7 +6,7 @@ Welcome to the knowledge hub for the Azure API-first proof of concept. This READ
 
 | Folder/File                                                          | Focus | When to use it |
 |----------------------------------------------------------------------| --- | --- |
-| [`architecture-diagrams.md`](architecture/architecture-diagrams.md) | C4-style and DDD views rendered with Mermaid. | Share the current platform topology with stakeholders or onboard new engineers to the system shape. |
+| [`architecture-diagrams.md`](architecture/architecture-diagrams [DDD + C4]) | C4-style and DDD views rendered with Mermaid. | Share the current platform topology with stakeholders or onboard new engineers to the system shape. |
 | [`frontend/`](frontend/)                                             | Angular SPA deep dives and Azure integration diagrams. | Align frontend development with Azure AD, API Management, and deployment best practices. |
 | [`tech_stack.md`](tech_stack.md)                                     | High-level technology choices across the stack. | Provide quick context on why Angular, Spring Boot, Azure services, and CI/CD tooling were selected. |
 | [`roadmap.md`](roadmap.md)                                           | 12-month platform roadmap in timeline form. | Communicate strategic milestones and quarterly goals with leadership. |

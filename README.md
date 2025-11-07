@@ -2,7 +2,7 @@
 
 ## Architecture
 
-A collection of detailed C4 and DDD diagrams is available in [docs/architecture-diagrams.md](docs/architecture/architecture-diagrams.md). The high-level flow below summarizes the main interaction path.
+A collection of detailed C4 and DDD diagrams is available in [docs/architecture-diagrams.md](docs/architecture/architecture-diagrams [DDD + C4]). The high-level flow below summarizes the main interaction path.
 
 ```mermaid
 flowchart LR
