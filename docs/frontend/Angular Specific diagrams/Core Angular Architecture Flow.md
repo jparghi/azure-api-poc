@@ -61,12 +61,4 @@ Here’s a polished, **Markdown-ready “How to Read It”** section for your Co
 
 ---
 
-✅ **Formatting Details**
-
-* Each point now starts on a **new line** (two spaces at line end).
-* Code elements (`main.ts`, `app.routes.ts`) are wrapped in backticks.
-* Sub-bullets (inside step 4) are indented properly for Markdown nesting.
-
----
-
 
