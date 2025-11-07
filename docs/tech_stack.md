@@ -26,7 +26,7 @@
 
 ---
 
-## 📊 Technology Stack Diagram (Mermaid)
+## 📊 Technology Stack Diagram 
 
 ```mermaid
 flowchart TB
